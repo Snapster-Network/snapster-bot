@@ -11,7 +11,7 @@ import { handleNewMessage } from "../utils/handlers/defaultHandler";
 /**
  * Constantly requests updates from the Snapster server via long polling.
  * 
- * @param {string} token - Token for authentication on the Snapster server.
+ * @param {ICtx} ctx - Current bot context.
  * @param {number} timeout - Timeout for long polling request.
  * @returns {Promise<boolean>} A promise that returns false if the server returns a status other than 200.
  * 
@@ -38,11 +38,6 @@ export const getUpdates = async (ctx: ICtx, timeout: number, sceneManager: Scene
                 message_id: serverRes.data.message.message_id,
                 from: serverRes.data.message.from,
                 text: serverRes.data.message.text
-
-                // chat: String(serverRes.data.message.chat) || "",
-                // message_id: String(serverRes.data.message.message_id) || "",
-                // from: String(serverRes.data.message.from) || "",
-                // text: String(serverRes.data.message.text) || ""
             };
 
             ctx.message = msgObj

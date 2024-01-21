@@ -18,7 +18,13 @@ interface IUserMessageToBot {
     text: string;
 }
 
-type IEmptyObject = {};
+interface IEmptyObject {};
+
+interface IGetMeAnswer {
+    botName: string,
+    username: string,
+    tags: string[]
+}
 
 
-export { IUserMessageToBot, IEmptyObject }
+export { IUserMessageToBot, IEmptyObject, IGetMeAnswer }

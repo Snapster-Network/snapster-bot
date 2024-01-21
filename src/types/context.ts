@@ -1,8 +1,8 @@
-import { IUserMessageToBot } from "./message"
+import { IGetMeAnswer, IUserMessageToBot } from "./message"
 import { ISceneContext } from "./scene"
 
-interface IBot {
-    token: string
+interface IBot extends IGetMeAnswer {
+    token: string,
 }
 
 interface ICtx {

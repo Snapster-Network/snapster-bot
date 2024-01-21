@@ -7,6 +7,7 @@ import SceneManager from "../scenes/SceneManager";
 import { ICtx } from "../types/context";
 import { ISceneManagerObserver } from "../types/scene";
 import { setNewMessageHandler } from "../utils/handlers/defaultHandler";
+import { getMe } from "../services/getMe";
 
 /**
  * Class representing a SnapsterBot.
@@ -33,7 +34,10 @@ class SnapsterBot implements ISceneManagerObserver {
         this.currentSceneManager = new SceneManager()
         this.publicContext = {
             bot: {
-                token
+                token,
+                botName: "",
+                username: "",
+                tags: []
             },
             message: {
                 date: new Date(),
@@ -80,6 +84,13 @@ class SnapsterBot implements ISceneManagerObserver {
     }
 
     public async launch() {
+        const botInfo = await getMe(this.botToken)
+        if (!botInfo) throw new Error("Wrong bot token")
+
+        this.publicContext.bot.botName = botInfo.botName
+        this.publicContext.bot.username = botInfo.username
+        this.publicContext.bot.tags = botInfo.tags
+
         console.log("Snapster Bot successfully started!")
         getUpdates(this.publicContext, this.getUpdatesTimeout, this.currentSceneManager)
     }
