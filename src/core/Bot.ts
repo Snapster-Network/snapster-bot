@@ -34,13 +34,14 @@ class SnapsterBot implements ISceneManagerObserver {
             bot: {
                 token
             },
-            message:{
+            message: {
                 date: new Date(),
                 chat: "",
                 message_id: "",
                 from: '',
                 text: ""
-            }
+            },
+            reply: () => false
         }
 
         this.observerUpdate = this.observerUpdate.bind(this);
@@ -63,7 +64,7 @@ class SnapsterBot implements ISceneManagerObserver {
      * @param {(message: string) => Promise<any>} customHandler - The custom handler to execute when the text is received.
      * @returns A promise that resolves when the handler is set.
      */
-    public async hearMessage(text: string, customHandler: (message: string) => Promise<any>) {
+    public async hearMessage(text: string, customHandler: (ctx: ICtx) => void) {
         return hearMessage(text, customHandler);
     }
 
@@ -73,7 +74,7 @@ class SnapsterBot implements ISceneManagerObserver {
      * @param {(message: string) => Promise<any>} customHandler - The custom handler to execute when the command is received.
      * @returns A promise that resolves when the handler is set.
      */
-    public async hearCommand(text: string, customHandler: (message: string) => Promise<any>) {
+    public async hearCommand(text: string, customHandler: (ctx: ICtx) => void) {
         return hearCommand(text, customHandler);
     }
 

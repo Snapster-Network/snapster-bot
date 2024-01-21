@@ -17,7 +17,7 @@ interface IScene {
     onEnter: (handler: (ctx: ICtx) => void) => void;
     onText: (handler: (ctx: ICtx) => void) => void;
     onMessage: (handler: (ctx: ICtx) => void) => void;
-    handleAction:(ctx: ICtx, action: EMessageTypes) => void;
+    handleAction: (ctx: ICtx, action: EMessageTypes) => void;
     getIsEnter(): boolean;
     setIsEnter(isEnter: boolean): void;
 }

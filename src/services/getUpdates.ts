@@ -5,6 +5,7 @@ import { checkCommandHandler } from "../utils/handlers/commandHandler";
 import SceneManager from "../scenes/SceneManager";
 import { ICtx } from "../types/context";
 import { EMessageTypes } from "../utils/enums";
+import { sendMessage } from "./sendMessage";
 
 /**
  * Constantly requests updates from the Snapster server via long polling.
@@ -44,9 +45,12 @@ export const getUpdates = async (ctx: ICtx, timeout: number, sceneManager: Scene
             };
 
             ctx.message = msgObj
+            ctx.reply = async (text) => {
+                return await sendMessage(ctx.bot.token, serverRes.data.message.chat, text)
+            }
 
-            checkTextHandler(msgObj);
-            checkCommandHandler(msgObj);
+            checkTextHandler(ctx);
+            checkCommandHandler(ctx);
             sceneManager.handleUserRequest(ctx, EMessageTypes.text)
 
             errorCount = 0;

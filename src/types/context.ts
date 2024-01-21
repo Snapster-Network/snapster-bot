@@ -8,7 +8,8 @@ interface IBot {
 interface ICtx {
     bot: IBot,
     message: IUserMessageToBot,
-    scene?: ISceneContext
+    scene?: ISceneContext,
+    reply: (text: string) => void
 }
 
 export { IBot, ICtx }
