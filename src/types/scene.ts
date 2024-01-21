@@ -1,9 +1,11 @@
-import { IBotContext } from "./context";
+import SceneManager from "../scenes/SceneManager";
+import { EMessageTypes } from "../utils/enums";
+import { ICtx } from "./context";
 
 interface IScenesGeneratorFunction {
-    enter: Function;
-    text: Function;
-    message: Function;
+    enter(ctx: ICtx): void;
+    text(ctx: ICtx): void;
+    message(ctx: ICtx): void;
 }
 
 interface IScenesGenerator {
@@ -11,25 +13,24 @@ interface IScenesGenerator {
 }
 
 interface IScene {
-    name: string;
-    enterHandler: Function | undefined;
-    textHandler: Function | undefined;
-    messageHandler: Function | undefined;
-    isEnter: boolean
-
     getName: () => void;
-    onEnter: (handler: (ctx: any) => void) => void;
-    onText: (handler: (ctx: any) => void) => void;
-    onMessage: (handler: (ctx: any) => void) => void;
-    handleAction(action: string, ctx: IBotContext): void;
+    onEnter: (handler: (ctx: ICtx) => void) => void;
+    onText: (handler: (ctx: ICtx) => void) => void;
+    onMessage: (handler: (ctx: ICtx) => void) => void;
+    handleAction:(ctx: ICtx, action: EMessageTypes) => void;
     getIsEnter(): boolean;
     setIsEnter(isEnter: boolean): void;
 }
 
 interface ISceneContext {
-    getName: () => string | undefined;
+    name: string | undefined;
     enter: (scene: string) => void;
     reenter: () => void;
 }
 
-export { IScenesGenerator, IScene, ISceneContext }
+
+interface ISceneManagerObserver {
+    observerUpdate(sceneManager: SceneManager): void;
+}
+
+export { IScenesGenerator, IScene, ISceneContext, ISceneManagerObserver }

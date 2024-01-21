@@ -4,16 +4,17 @@ import { validateBotToken } from "../utils/validators";
 import { getUpdates } from "../services/getUpdates";
 import { hearCommand } from "../services/hearCommand";
 import SceneManager from "../scenes/SceneManager";
-import { IBotContext } from "../types/context";
+import { ICtx } from "../types/context";
+import { ISceneManagerObserver } from "../types/scene";
 
 /**
  * Class representing a SnapsterBot.
  */
-class SnapsterBot {
+class SnapsterBot implements ISceneManagerObserver {
     private botToken: string;
     private getUpdatesTimeout: number;
     private currentSceneManager: SceneManager
-    publicContext: IBotContext
+    private publicContext: ICtx
 
     /**
      * Create a SnapsterBot.
@@ -32,8 +33,18 @@ class SnapsterBot {
         this.publicContext = {
             bot: {
                 token
+            },
+            message:{
+                date: new Date(),
+                chat: "",
+                message_id: "",
+                from: '',
+                text: ""
             }
         }
+
+        this.observerUpdate = this.observerUpdate.bind(this);
+        this.currentSceneManager.addObserver(this.observerUpdate);
     }
 
     /**
@@ -76,15 +87,17 @@ class SnapsterBot {
     }
 
     public async setScenes(scenes: any) {
-        const sceneManager = new SceneManager();
-        this.currentSceneManager = sceneManager
-        sceneManager.setScenesArray(scenes);
+        this.currentSceneManager.setScenesArray(scenes);
+    }
+
+    observerUpdate(sceneManager: SceneManager) {
+        const currentSceneName = sceneManager.getCurrentSceneName();
 
         this.publicContext.scene = {
-            getName: sceneManager.getCurrentSceneName,
-            enter: sceneManager.sceneEnter,
-            reenter: sceneManager.sceneReenter,
-        }
+            name: currentSceneName,
+            enter: sceneManager.sceneEnter.bind(sceneManager),
+            reenter: sceneManager.sceneReenter.bind(sceneManager),
+        };
     }
 }
 

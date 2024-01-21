@@ -1,32 +1,29 @@
-import { IBotContext } from "../types/context";
+import { ICtx } from "../types/context";
 import { EMessageTypes } from "../utils/enums";
 import { Scene } from "./Scene";
 
 class SceneManager {
     private scenesArray: Record<string, Scene>;
     private currentScene: string | undefined;
+    private observers: Function[] = [];
 
     constructor() {
         this.scenesArray = {}
     }
 
+    addObserver(observer: Function) {
+        this.observers.push(observer);
+    }
+
+    notifyObservers() {
+        for (const observer of this.observers) {
+            observer(this);
+        }
+    }
+
     addScene(scene: Scene) {
         return this.scenesArray[scene.getName()] = scene;
     }
-
-    // enterScene(sceneName: string, fun: Function) {
-    //     const scene = this.scenes[sceneName];
-    //     if (scene) {
-    //         // this.context.enter(scene)
-    //         fun(this.context)
-    //     } else {
-    //         throw new Error(`Scene "${sceneName}" not found`)
-    //     }
-    // }
-
-    // leaveScene() {
-    //     this.context.leave();
-    // }
 
     setScenesArray(scenes: any) {
         for (const methodName in scenes) {
@@ -39,32 +36,18 @@ class SceneManager {
         }
     }
 
-    // setScenesArray(scenes:IScenesGenerator) {
-    //     for (const methodName in scenes) {
-    //         const scene = scenes[methodName];
-    //         const action: ISceneAction = {
-    //             enter(handler: (ctx: IBotContext) => Promise<void>): void {
-    //               handler("ctx");
-    //             },
-
-    //             on(eventType: string, handler: (ctx: IBotContext) => Promise<void>): void {
-    //                 handler("ctx");
-    //             }
-    //           };
-    //         scene(action);
-    //       }
-    // } 
-
     sceneEnter(sceneName: string) {
         if (!this.scenesArray) return false
         else if (!Object.keys(this.scenesArray).includes(sceneName)) return false
         this.currentScene = sceneName
+        this.notifyObservers();
         return true
     }
 
     sceneReenter() {
         const currentScene = this.getCurrentSceneName()
         if (!currentScene) return false
+        this.notifyObservers();
         return this.sceneEnter(currentScene)
     }
 
@@ -83,33 +66,11 @@ class SceneManager {
         return true
     }
 
-    // handleUpdate(update: any) {
-    //     if (this.context.scene) {
-    //         this.context.scene.handleMessage({
-    //             ...update,
-    //             scene: this.context,
-    //             enterScene: this.enterScene.bind(this),
-    //             leaveScene: this.leaveScene.bind(this)
-    //         });
-    //     }
-    // }
-
-    handleUserRequest(ctx: IBotContext, action: EMessageTypes): boolean {
+    handleUserRequest(ctx: ICtx, action: EMessageTypes): boolean {
         try {
             const currentScene: Scene | undefined = this.getCurrentScene();
             if (!currentScene) return false;
 
-            // const action: ISceneAction = {
-            //     enter(handler: (ctx: IBotContext) => Promise<void>): void {
-            //         handler(msgObj);
-            //     }
-
-            //     on(eventType: string, handler: (ctx: IBotContext) => Promise<void>): void {
-            //                 if (eventType == 'text') handler(msgObj);
-            //             }
-            //         }
-            //     };
-            // }
             currentScene.handleAction(ctx, action);
 
             return true;
@@ -118,15 +79,6 @@ class SceneManager {
             return false
         }
     }
-
-    // public handleUpdate(update: any) {
-    //     // Обробляємо повідомлення
-    //     if (update.type === "message") {
-    //       const message = update.message;
-    //       // Передаємо повідомлення сцені
-    //       this.context.scene.onMessage(message);
-    //     }
-    //   }
 }
 
 export default SceneManager 

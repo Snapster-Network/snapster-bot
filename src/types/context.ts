@@ -5,10 +5,10 @@ interface IBot {
     token: string
 }
 
-interface IBotContext {
+interface ICtx {
     bot: IBot,
-    message?: IUserMessageToBot,
+    message: IUserMessageToBot,
     scene?: ISceneContext
 }
 
-export { IBot, IBotContext }
+export { IBot, ICtx }

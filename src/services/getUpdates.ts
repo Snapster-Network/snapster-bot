@@ -3,7 +3,7 @@ import { longPollingRequest } from "../utils/longPollingRequest";
 import { checkTextHandler } from "../utils/handlers/textHandler";
 import { checkCommandHandler } from "../utils/handlers/commandHandler";
 import SceneManager from "../scenes/SceneManager";
-import { IBotContext } from "../types/context";
+import { ICtx } from "../types/context";
 import { EMessageTypes } from "../utils/enums";
 
 /**
@@ -19,7 +19,7 @@ import { EMessageTypes } from "../utils/enums";
  * If the number of errors exceeds the allowed maximum (`maxErrors`), the function will make a longer pause (`pauseDuration`) before the next attempt.
  */
 
-export const getUpdates = async (ctx: IBotContext, timeout: number, sceneManager: SceneManager) => {
+export const getUpdates = async (ctx: ICtx, timeout: number, sceneManager: SceneManager) => {
     let errorCount = 0;
     const maxErrors = 10;
     const pauseDuration = 15 * 60 * 1000;
