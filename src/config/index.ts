@@ -25,4 +25,12 @@ export const botVariables: IBotVariables = {
     getIsCommandHandlerSet: function () {
         return this._isCommandHandlerSet;
     },
+
+    _isNewMessageHandlerSet: false,
+    setIsNewMessageHandlerSet: function (res: boolean) {
+        this._isNewMessageHandlerSet = res;
+    },
+    getIsNewMessageHandlerSet: function () {
+        return this._isNewMessageHandlerSet;
+    },
 };

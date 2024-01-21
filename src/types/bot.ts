@@ -31,6 +31,21 @@ interface IBotVariables {
      * @returns {boolean} The current state of the command handler.
      */
     getIsCommandHandlerSet(): boolean;
+
+     /** Indicates whether a new message handler has been set. */
+     _isNewMessageHandlerSet: boolean;
+
+     /**
+      * Sets the state of the new message handler.
+      * @param {boolean} res - The new state to set for the new message handler.
+      */
+     setIsNewMessageHandlerSet(res: boolean): void;
+ 
+     /**
+      * Gets the state of the new message handler.
+      * @returns {boolean} The current state of the new message handler.
+      */
+     getIsNewMessageHandlerSet(): boolean;
 }
 
 export { IBotVariables }

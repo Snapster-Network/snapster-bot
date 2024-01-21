@@ -6,6 +6,7 @@ import { hearCommand } from "../services/hearCommand";
 import SceneManager from "../scenes/SceneManager";
 import { ICtx } from "../types/context";
 import { ISceneManagerObserver } from "../types/scene";
+import { setNewMessageHandler } from "../utils/handlers/defaultHandler";
 
 /**
  * Class representing a SnapsterBot.
@@ -99,6 +100,10 @@ class SnapsterBot implements ISceneManagerObserver {
             enter: sceneManager.sceneEnter.bind(sceneManager),
             reenter: sceneManager.sceneReenter.bind(sceneManager),
         };
+    }
+
+    onNewMessage(customHandler: (ctx: ICtx) => void) {
+        setNewMessageHandler(customHandler)
     }
 }
 
