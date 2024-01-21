@@ -26,4 +26,10 @@ interface IScene {
     setIsEnter(isEnter: boolean): void;
 }
 
-export { IScenesGenerator, IScene }
+interface ISceneContext {
+    getName: () => string | undefined;
+    enter: (scene: string) => void;
+    reenter: () => void;
+}
+
+export { IScenesGenerator, IScene, ISceneContext }

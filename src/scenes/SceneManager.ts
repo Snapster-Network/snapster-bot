@@ -62,10 +62,20 @@ class SceneManager {
         return true
     }
 
+    sceneReenter() {
+        const currentScene = this.getCurrentSceneName()
+        if (!currentScene) return false
+        return this.sceneEnter(currentScene)
+    }
+
     getCurrentScene() {
         if (!this.scenesArray || !this.currentScene) return undefined
         const currentScene = this.scenesArray[this.currentScene]
         return currentScene || undefined
+    }
+
+    getCurrentSceneName(): string | undefined {
+        return this.currentScene
     }
 
     isSceneSet() {
@@ -84,24 +94,29 @@ class SceneManager {
     //     }
     // }
 
-    handleUserRequest(ctx: IBotContext, action: EMessageTypes) {
-        const currentScene: Scene | undefined = this.getCurrentScene();
-        if (!currentScene) return null;
+    handleUserRequest(ctx: IBotContext, action: EMessageTypes): boolean {
+        try {
+            const currentScene: Scene | undefined = this.getCurrentScene();
+            if (!currentScene) return false;
 
-        // const action: ISceneAction = {
-        //     enter(handler: (ctx: IBotContext) => Promise<void>): void {
-        //         handler(msgObj);
-        //     }
+            // const action: ISceneAction = {
+            //     enter(handler: (ctx: IBotContext) => Promise<void>): void {
+            //         handler(msgObj);
+            //     }
 
-        //     on(eventType: string, handler: (ctx: IBotContext) => Promise<void>): void {
-        //                 if (eventType == 'text') handler(msgObj);
-        //             }
-        //         }
-        //     };
-        // }
-        currentScene.handleAction(ctx, action);
+            //     on(eventType: string, handler: (ctx: IBotContext) => Promise<void>): void {
+            //                 if (eventType == 'text') handler(msgObj);
+            //             }
+            //         }
+            //     };
+            // }
+            currentScene.handleAction(ctx, action);
 
-        return true;
+            return true;
+        } catch (error) {
+            console.error(`Scene manager error: ${error}`);
+            return false
+        }
     }
 
     // public handleUpdate(update: any) {

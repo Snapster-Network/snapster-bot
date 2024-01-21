@@ -75,12 +75,16 @@ class SnapsterBot {
         this.currentSceneManager.sceneEnter(scene)
     }
 
-    // public async setScenes(scenes: IScenesGenerator) {
     public async setScenes(scenes: any) {
-        // this.scenesArray = scenes
         const sceneManager = new SceneManager();
         this.currentSceneManager = sceneManager
         sceneManager.setScenesArray(scenes);
+
+        this.publicContext.scene = {
+            getName: sceneManager.getCurrentSceneName,
+            enter: sceneManager.sceneEnter,
+            reenter: sceneManager.sceneReenter,
+        }
     }
 }
 
