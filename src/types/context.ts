@@ -8,7 +8,7 @@ interface IBot extends IGetMeAnswer {
 interface ICtx {
     bot: IBot,
     message: IUserMessageToBot,
-    scene?: ISceneContext,
+    scene: ISceneContext,
     reply: (text: string) => void
 }
 

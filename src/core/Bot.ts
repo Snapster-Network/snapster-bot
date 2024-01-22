@@ -50,6 +50,11 @@ class SnapsterBot implements ISceneManagerObserver {
                 from: '',
                 text: ""
             },
+            scene: {
+                name: undefined,
+                enter: () => { },
+                reenter: () => { }
+            },
             reply: () => false
         }
 
