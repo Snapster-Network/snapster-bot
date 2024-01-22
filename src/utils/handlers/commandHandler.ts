@@ -1,10 +1,10 @@
 import { botVariables } from '../../config';
-import { IUserMessageToBot } from '../../types/message';
+import { ICtx } from '../../types/context';
 
 const commandRegex = /^\/[a-z]+$/;
 
 type record = {
-    customHandler: Function
+    customHandler: (ctx: ICtx) => void
 };
 
 const handlers: Record<string, record[]> = {};
@@ -27,21 +27,21 @@ const getKey = (text: string) => {
 
 /**
  * Checks and executes the command handler for the given message object.
- * @param {IUserMessageToBot} msgObj - The message object received from the bot.
+ * @param {ICtx} ctx - The message object received from the bot.
  * @returns {boolean} Returns `true` if a handler is executed, otherwise `false`.
  */
-export const checkCommandHandler = async (msgObj: IUserMessageToBot) => {
+export const checkCommandHandler = async (ctx: ICtx) => {
     try {
         if (!botVariables.getIsCommandHandlerSet()) return false
-        if (!checkKey(msgObj.text)) return false
+        if (!checkKey(ctx.message.text)) return false
 
-        const key = getKey(msgObj.text);
+        const key = getKey(ctx.message.text);
         const handler = handlers[key];
 
         if (!handler) return false;
 
         for (const el of handler) {
-            el.customHandler(msgObj);
+            el.customHandler(ctx);
         }
 
         return true;
@@ -57,7 +57,7 @@ export const checkCommandHandler = async (msgObj: IUserMessageToBot) => {
  * @param {Function} customHandler - The custom handler function to execute when the command is received.
  * @returns {boolean} Returns `true` if the handler is successfully set, otherwise `false`.
  */
-export const setCommandHandler = async (text: string, customHandler: Function) => {
+export const setCommandHandler = async (text: string, customHandler: (ctx: ICtx) => void) => {
     try {
         if (!commandRegex.test(text)) return false;
 

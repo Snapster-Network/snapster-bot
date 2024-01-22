@@ -1,12 +1,15 @@
-import { IUserMessageToBot } from "./message"
+import { IGetMeAnswer, IUserMessageToBot } from "./message"
+import { ISceneContext } from "./scene"
 
-interface IBot {
-    token: string
+interface IBot extends IGetMeAnswer {
+    token: string,
 }
 
-interface IBotContext {
+interface ICtx {
     bot: IBot,
-    message?: IUserMessageToBot
+    message: IUserMessageToBot,
+    scene: ISceneContext,
+    reply: (text: string) => void
 }
 
-export { IBot, IBotContext }
+export { IBot, ICtx }
