@@ -1,32 +1,29 @@
-import { IBotContext } from "../types/context";
-import { EMessageTypes } from "../utils/enums";
-import { Scene } from "./Scene";
+import { ICtx } from "../types/context";
+import { EActionTypes } from "../utils/enums";
+import Scene from "./Scene";
 
 class SceneManager {
     private scenesArray: Record<string, Scene>;
     private currentScene: string | undefined;
+    private observers: Function[] = [];
 
     constructor() {
         this.scenesArray = {}
     }
 
+    addObserver(observer: Function) {
+        this.observers.push(observer);
+    }
+
+    notifyObservers(ctx: ICtx) {
+        for (const observer of this.observers) {
+            observer(ctx, this);
+        }
+    }
+
     addScene(scene: Scene) {
         return this.scenesArray[scene.getName()] = scene;
     }
-
-    // enterScene(sceneName: string, fun: Function) {
-    //     const scene = this.scenes[sceneName];
-    //     if (scene) {
-    //         // this.context.enter(scene)
-    //         fun(this.context)
-    //     } else {
-    //         throw new Error(`Scene "${sceneName}" not found`)
-    //     }
-    // }
-
-    // leaveScene() {
-    //     this.context.leave();
-    // }
 
     setScenesArray(scenes: any) {
         for (const methodName in scenes) {
@@ -39,27 +36,27 @@ class SceneManager {
         }
     }
 
-    // setScenesArray(scenes:IScenesGenerator) {
-    //     for (const methodName in scenes) {
-    //         const scene = scenes[methodName];
-    //         const action: ISceneAction = {
-    //             enter(handler: (ctx: IBotContext) => Promise<void>): void {
-    //               handler("ctx");
-    //             },
+    leaveScene(sceneName: string) {
+        const previousScene = this.scenesArray[sceneName]
+        if (!previousScene) return false;
 
-    //             on(eventType: string, handler: (ctx: IBotContext) => Promise<void>): void {
-    //                 handler("ctx");
-    //             }
-    //           };
-    //         scene(action);
-    //       }
-    // } 
+        return previousScene.leave()
+    }
 
-    sceneEnter(sceneName: string) {
-        if (!this.scenesArray) return false
-        else if (!Object.keys(this.scenesArray).includes(sceneName)) return false
-        this.currentScene = sceneName
-        return true
+    async sceneEnter(ctx: ICtx, sceneName: string, oldScene: string | undefined): Promise<boolean> {
+        if (!this.scenesArray[sceneName]) return false;
+        if (this.currentScene) this.scenesArray[sceneName].handleAction(ctx, EActionTypes.enter);
+        if (oldScene) this.leaveScene(oldScene)
+        this.currentScene = sceneName;
+        this.notifyObservers(ctx);
+        return true;
+    }
+
+    sceneReenter(ctx: ICtx) {
+        const currentScene = this.getCurrentSceneName()
+        if (!currentScene) return false
+        this.notifyObservers(ctx);
+        return this.sceneEnter(ctx, currentScene, currentScene)
     }
 
     getCurrentScene() {
@@ -68,50 +65,27 @@ class SceneManager {
         return currentScene || undefined
     }
 
+    getCurrentSceneName(): string | undefined {
+        return this.currentScene
+    }
+
     isSceneSet() {
         if (!this.currentScene) return false
         return true
     }
 
-    // handleUpdate(update: any) {
-    //     if (this.context.scene) {
-    //         this.context.scene.handleMessage({
-    //             ...update,
-    //             scene: this.context,
-    //             enterScene: this.enterScene.bind(this),
-    //             leaveScene: this.leaveScene.bind(this)
-    //         });
-    //     }
-    // }
+    handleUserRequest(ctx: ICtx, action: EActionTypes): boolean {
+        try {
+            const currentScene: Scene | undefined = this.getCurrentScene();
+            if (!currentScene) return false;
 
-    handleUserRequest(ctx: IBotContext, action: EMessageTypes) {
-        const currentScene: Scene | undefined = this.getCurrentScene();
-        if (!currentScene) return null;
-
-        // const action: ISceneAction = {
-        //     enter(handler: (ctx: IBotContext) => Promise<void>): void {
-        //         handler(msgObj);
-        //     }
-
-        //     on(eventType: string, handler: (ctx: IBotContext) => Promise<void>): void {
-        //                 if (eventType == 'text') handler(msgObj);
-        //             }
-        //         }
-        //     };
-        // }
-        currentScene.handleAction(ctx, action);
-
-        return true;
+            currentScene.handleAction(ctx, action);
+            return true;
+        } catch (error) {
+            console.error(`Scene manager error: ${error}`);
+            return false
+        }
     }
-
-    // public handleUpdate(update: any) {
-    //     // Обробляємо повідомлення
-    //     if (update.type === "message") {
-    //       const message = update.message;
-    //       // Передаємо повідомлення сцені
-    //       this.context.scene.onMessage(message);
-    //     }
-    //   }
 }
 
-export default SceneManager 
+export default SceneManager

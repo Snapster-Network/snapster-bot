@@ -1,49 +1,47 @@
-import { IBotContext } from "../types/context";
-import { EMessageTypes } from "../utils/enums";
+import { ICtx } from "../types/context";
+import { IScene } from "../types/scene";
+import { EActionTypes } from "../utils/enums";
 
-class Scene {
+class Scene implements IScene {
     private name: string;
-    private enterHandler: Function | undefined;
-    private textHandler: Function | undefined;
-    private messageHandler: Function | undefined;
+    private enterHandler: (ctx: ICtx) => void;
+    private textHandler: (ctx: ICtx) => void;
+    private messageHandler: (ctx: ICtx) => void;
     private isEnter: boolean = true
 
     constructor(name: string) {
         this.name = name;
+        this.enterHandler = () => { }
+        this.textHandler = () => { }
+        this.messageHandler = () => { }
     }
 
     public getName(): string {
         return this.name;
     }
 
-    onEnter(handler: Function) {
+    onEnter(handler: (ctx: ICtx) => void) {
         this.enterHandler = handler
     }
 
-    onText(handler: Function) {
+    onText(handler: (ctx: ICtx) => void) {
         this.textHandler = handler
     }
 
-    onMessage(handler: Function) {
+    onMessage(handler: (ctx: ICtx) => void) {
         this.messageHandler = handler
     }
 
-    handleAction(ctx: IBotContext, action: EMessageTypes) {
-        if (this.isEnter && this.enterHandler) {
-            this.isEnter = false;
-            this.enterHandler(ctx)
-        }
-        else if (action == EMessageTypes.text && this.textHandler) this.textHandler(ctx)
-        else if (action == EMessageTypes.message && this.messageHandler) this.messageHandler(ctx)
+    handleAction(ctx: ICtx, action: EActionTypes) {
+        if (action == EActionTypes.enter || this.isEnter) this.isEnter = false, this.enterHandler(ctx)
+        else if (action == EActionTypes.text) this.textHandler(ctx)
+        else if (action == EActionTypes.message) this.messageHandler(ctx)
     }
 
-    getIsEnter() {
-        return this.isEnter
-    }
-
-    setIsEnter() {
-        this.isEnter = false
+    leave() {
+        this.isEnter = true
+        return true
     }
 }
 
-export { Scene }
+export default Scene
