@@ -1,6 +1,6 @@
 import { ICtx } from "../types/context";
 import { EMessageTypes } from "../utils/enums";
-import { Scene } from "./Scene";
+import Scene from "./Scene";
 
 class SceneManager {
     private scenesArray: Record<string, Scene>;
@@ -81,4 +81,4 @@ class SceneManager {
     }
 }
 
-export default SceneManager 
+export default SceneManager

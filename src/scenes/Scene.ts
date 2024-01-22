@@ -47,4 +47,4 @@ class Scene implements IScene {
     }
 }
 
-export { Scene }
+export default Scene 
