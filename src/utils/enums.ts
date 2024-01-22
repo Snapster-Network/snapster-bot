@@ -1,5 +1,5 @@
-enum EMessageTypes {
-    text = "text", message = "message"
+enum EActionTypes {
+    text = "text", message = "message", enter = "enter"
 }
 
-export { EMessageTypes }
+export { EActionTypes }

@@ -1,5 +1,5 @@
 import { ICtx } from "../types/context";
-import { EMessageTypes } from "../utils/enums";
+import { EActionTypes } from "../utils/enums";
 import Scene from "./Scene";
 
 class SceneManager {
@@ -15,9 +15,9 @@ class SceneManager {
         this.observers.push(observer);
     }
 
-    notifyObservers() {
+    notifyObservers(ctx: ICtx) {
         for (const observer of this.observers) {
-            observer(this);
+            observer(ctx, this);
         }
     }
 
@@ -36,19 +36,27 @@ class SceneManager {
         }
     }
 
-    sceneEnter(sceneName: string) {
-        if (!this.scenesArray) return false
-        else if (!Object.keys(this.scenesArray).includes(sceneName)) return false
-        this.currentScene = sceneName
-        this.notifyObservers();
-        return true
+    leaveScene(sceneName: string) {
+        const previousScene = this.scenesArray[sceneName]
+        if (!previousScene) return false;
+
+        return previousScene.leave()
     }
 
-    sceneReenter() {
+    async sceneEnter(ctx: ICtx, sceneName: string, oldScene: string | undefined): Promise<boolean> {
+        if (!this.scenesArray[sceneName]) return false;
+        if (this.currentScene) this.scenesArray[sceneName].handleAction(ctx, EActionTypes.enter);
+        if (oldScene) this.leaveScene(oldScene)
+        this.currentScene = sceneName;
+        this.notifyObservers(ctx);
+        return true;
+    }
+
+    sceneReenter(ctx: ICtx) {
         const currentScene = this.getCurrentSceneName()
         if (!currentScene) return false
-        this.notifyObservers();
-        return this.sceneEnter(currentScene)
+        this.notifyObservers(ctx);
+        return this.sceneEnter(ctx, currentScene, currentScene)
     }
 
     getCurrentScene() {
@@ -66,13 +74,12 @@ class SceneManager {
         return true
     }
 
-    handleUserRequest(ctx: ICtx, action: EMessageTypes): boolean {
+    handleUserRequest(ctx: ICtx, action: EActionTypes): boolean {
         try {
             const currentScene: Scene | undefined = this.getCurrentScene();
             if (!currentScene) return false;
 
             currentScene.handleAction(ctx, action);
-
             return true;
         } catch (error) {
             console.error(`Scene manager error: ${error}`);

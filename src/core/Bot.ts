@@ -1,13 +1,17 @@
 import { hearMessage } from "../services/hearMessage";
 import { sendMessage } from "../services/sendMessage";
 import { validateBotToken } from "../utils/validators";
-import { getUpdates } from "../services/getUpdates";
 import { hearCommand } from "../services/hearCommand";
 import SceneManager from "../scenes/SceneManager";
 import { ICtx } from "../types/context";
 import { ISceneManagerObserver } from "../types/scene";
-import { setNewMessageHandler } from "../utils/handlers/defaultHandler";
+import { handleNewMessage, setNewMessageHandler } from "../utils/handlers/defaultHandler";
 import { getMe } from "../services/getMe";
+import { checkTextHandler } from "../utils/handlers/textHandler";
+import { checkCommandHandler } from "../utils/handlers/commandHandler";
+import { IUserMessageToBot } from "../types/message";
+import { longPollingRequest } from "../utils/longPollingRequest";
+import { EActionTypes } from "../utils/enums";
 
 /**
  * Class representing a SnapsterBot.
@@ -92,24 +96,67 @@ class SnapsterBot implements ISceneManagerObserver {
         this.publicContext.bot.tags = botInfo.tags
 
         console.log("Snapster Bot successfully started!")
-        getUpdates(this.publicContext, this.getUpdatesTimeout, this.currentSceneManager)
+        let errorCount = 0;
+        const maxErrors = 10;
+        const pauseDuration = 15 * 60 * 1000;
+
+        while (true) {
+            try {
+                const serverRes = await longPollingRequest(this.publicContext.bot.token, this.getUpdatesTimeout);
+                if (!serverRes) throw new Error('Snapster server not working')
+                else if (serverRes.code != 200) return false;
+
+                const msgObj: IUserMessageToBot = {
+                    date: serverRes.data.message.date,
+                    chat: serverRes.data.message.chat,
+                    message_id: serverRes.data.message.message_id,
+                    from: serverRes.data.message.from,
+                    text: serverRes.data.message.text
+                };
+
+                this.publicContext.message = msgObj
+                this.publicContext.reply = async (text) => {
+                    return await sendMessage(this.publicContext.bot.token, serverRes.data.message.chat, text)
+                }
+
+                checkTextHandler(this.publicContext);
+                checkCommandHandler(this.publicContext);
+                handleNewMessage(this.publicContext)
+
+                this.currentSceneManager.handleUserRequest(this.publicContext, EActionTypes.text)
+
+                errorCount = 0;
+            } catch (error) {
+                console.error(`Error getting updates: ${error}`);
+                errorCount++;
+
+                await new Promise(resolve => setTimeout(resolve, 10 * 1000));
+
+                if (errorCount >= maxErrors) {
+                    console.error(`Too many wrong requests (${errorCount}), pausing for ${pauseDuration / 1000 / 60} minutes.`);
+                    await new Promise(resolve => setTimeout(resolve, pauseDuration));
+                    errorCount = 0;
+                }
+            }
+        }
     }
 
     public async sceneEnter(scene: string) {
-        this.currentSceneManager.sceneEnter(scene)
+        console.log("from library: ", { scene })
+        this.currentSceneManager.sceneEnter(this.publicContext, scene, undefined)
     }
 
     public async setScenes(scenes: any) {
         this.currentSceneManager.setScenesArray(scenes);
     }
 
-    observerUpdate(sceneManager: SceneManager) {
+    observerUpdate(ctx: ICtx, sceneManager: SceneManager) {
         const currentSceneName = sceneManager.getCurrentSceneName();
 
         this.publicContext.scene = {
             name: currentSceneName,
-            enter: sceneManager.sceneEnter.bind(sceneManager),
-            reenter: sceneManager.sceneReenter.bind(sceneManager),
+            enter: (sceneName: string) => sceneManager.sceneEnter(ctx, sceneName, currentSceneName),
+            reenter: () => sceneManager.sceneReenter(ctx),
         };
     }
 

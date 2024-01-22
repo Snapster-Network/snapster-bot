@@ -1,16 +1,19 @@
 import { ICtx } from "../types/context";
 import { IScene } from "../types/scene";
-import { EMessageTypes } from "../utils/enums";
+import { EActionTypes } from "../utils/enums";
 
 class Scene implements IScene {
     private name: string;
-    private enterHandler: ((ctx: ICtx) => void) | undefined;
-    private textHandler: ((ctx: ICtx) => void) | undefined;
-    private messageHandler: ((ctx: ICtx) => void) | undefined;
+    private enterHandler: (ctx: ICtx) => void;
+    private textHandler: (ctx: ICtx) => void;
+    private messageHandler: (ctx: ICtx) => void;
     private isEnter: boolean = true
 
     constructor(name: string) {
         this.name = name;
+        this.enterHandler = () => { }
+        this.textHandler = () => { }
+        this.messageHandler = () => { }
     }
 
     public getName(): string {
@@ -29,22 +32,16 @@ class Scene implements IScene {
         this.messageHandler = handler
     }
 
-    handleAction(ctx: ICtx, action: EMessageTypes) {
-        if (this.isEnter && this.enterHandler) {
-            this.isEnter = false;
-            this.enterHandler(ctx)
-        }
-        else if (action == EMessageTypes.text && this.textHandler) this.textHandler(ctx)
-        else if (action == EMessageTypes.message && this.messageHandler) this.messageHandler(ctx)
+    handleAction(ctx: ICtx, action: EActionTypes) {
+        if (action == EActionTypes.enter || this.isEnter) this.isEnter = false, this.enterHandler(ctx)
+        else if (action == EActionTypes.text) this.textHandler(ctx)
+        else if (action == EActionTypes.message) this.messageHandler(ctx)
     }
 
-    getIsEnter() {
-        return this.isEnter
-    }
-
-    setIsEnter() {
-        this.isEnter = false
+    leave() {
+        this.isEnter = true
+        return true
     }
 }
 
-export default Scene 
+export default Scene
