@@ -1,4 +1,4 @@
-import { IGetMeAnswer, IUserMessageToBot } from "./message"
+import { IGetMeAnswer, IMessageAddInfoToUser, IUserMessageToBot } from "./message"
 import { ISceneContext } from "./scene"
 
 interface IBot extends IGetMeAnswer {
@@ -9,7 +9,7 @@ interface ICtx {
     bot: IBot,
     message: IUserMessageToBot,
     scene: ISceneContext,
-    reply: (text: string) => void
+    reply: (text: string, addInfo?: IMessageAddInfoToUser) => void
 }
 
 export { IBot, ICtx }

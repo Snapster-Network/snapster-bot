@@ -1,3 +1,5 @@
+import { EKeyboardType, ETextStylingTypesObject } from "../utils/enums";
+
 /**
  * Interface representing a message received by the bot from a user.
  */
@@ -18,13 +20,35 @@ interface IUserMessageToBot {
     text: string;
 }
 
-interface IEmptyObject {};
+interface IEmptyObject { };
 
 interface IGetMeAnswer {
-    botName: string,
-    username: string,
-    tags: string[]
+    botName: string;
+    username: string;
+    tags: string[];
 }
 
 
-export { IUserMessageToBot, IEmptyObject, IGetMeAnswer }
+interface IKeyboard {
+    // type: EKeyboardType,
+    type: EKeyboardType.reply,
+}
+
+interface IInlineKeyboard extends IKeyboard {
+    keyboard: any;
+}
+
+interface IReplyKeyboard extends IKeyboard {
+    one_time_keyboard?: boolean;
+    resize_keyboard?: boolean;
+    keyboard: any;
+}
+
+interface IMessageAddInfoToUser {
+    silentMode?: boolean;
+    protectContent?: boolean;
+    stylingType?: ETextStylingTypesObject;
+    keyboard?: IInlineKeyboard | IReplyKeyboard
+}
+
+export { IUserMessageToBot, IEmptyObject, IGetMeAnswer, IMessageAddInfoToUser, IReplyKeyboard, IInlineKeyboard }

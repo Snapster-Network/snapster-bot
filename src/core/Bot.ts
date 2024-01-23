@@ -9,7 +9,7 @@ import { handleNewMessage, setNewMessageHandler } from "../utils/handlers/defaul
 import { getMe } from "../services/getMe";
 import { checkTextHandler } from "../utils/handlers/textHandler";
 import { checkCommandHandler } from "../utils/handlers/commandHandler";
-import { IUserMessageToBot } from "../types/message";
+import { IMessageAddInfoToUser, IUserMessageToBot } from "../types/message";
 import { longPollingRequest } from "../utils/longPollingRequest";
 import { EActionTypes } from "../utils/enums";
 
@@ -68,8 +68,8 @@ class SnapsterBot implements ISceneManagerObserver {
      * @param {string} text - The text of the message to send.
      * @returns A promise that resolves when the message is sent.
      */
-    public async sendMessage(chatId: string, text: string) {
-        return await sendMessage(this.botToken, chatId, text);
+    public async sendMessage(chatId: string, text: string, addInfo?: IMessageAddInfoToUser) {
+        return await sendMessage(this.botToken, chatId, text, addInfo);
     }
 
     /**
@@ -120,8 +120,8 @@ class SnapsterBot implements ISceneManagerObserver {
                 };
 
                 this.publicContext.message = msgObj
-                this.publicContext.reply = async (text) => {
-                    return await sendMessage(this.publicContext.bot.token, serverRes.data.message.chat, text)
+                this.publicContext.reply = async (text, addInfo) => {
+                    return await sendMessage(this.publicContext.bot.token, serverRes.data.message.chat, text, addInfo)
                 }
 
                 checkTextHandler(this.publicContext);
@@ -147,7 +147,6 @@ class SnapsterBot implements ISceneManagerObserver {
     }
 
     public async sceneEnter(scene: string) {
-        console.log("from library: ", { scene })
         this.currentSceneManager.sceneEnter(this.publicContext, scene, undefined)
     }
 
