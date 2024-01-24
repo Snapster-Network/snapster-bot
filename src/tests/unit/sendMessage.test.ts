@@ -10,7 +10,7 @@ describe('sendMessage', () => {
 
         const result = await sendMessage('CB:D48B1CEE04DD582F13C683DE82037BAA97231EC52057A5CC730A011D93E13350', 'p:65a7afe9fde5915a1c6f01b0', 'Hello, world!');
         expect(result).toBe(true);
-        expect(mockedAxios.post).toHaveBeenCalledWith('http://localhost:3000/v1/bot/sendMessage', {
+        expect(mockedAxios.post).toHaveBeenCalledWith('http://localhost:3000/v1/botApi/sendMessage', {
             chat_id: '123456',
             text: 'Hello, world!'
         }, {

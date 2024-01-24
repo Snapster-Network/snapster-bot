@@ -27,7 +27,7 @@ export const sendMessage = async (token: string, chat_id: string, text: string, 
     }
 
     try {
-        const res = await axios.post(`${SNAPSTER_API_URL}/v1/bot/sendMessage`,
+        const res = await axios.post(`${SNAPSTER_API_URL}/v1/botApi/sendMessage`,
             messageObject,
             {
                 headers: {

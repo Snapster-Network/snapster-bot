@@ -12,7 +12,7 @@ describe('longPollingRequest', () => {
 
         const result = await longPollingRequest('test-token', 100);
         expect(result).toBe(mockData);
-        expect(mockedAxios.get).toHaveBeenCalledWith(`${SNAPSTER_API_URL}/v1/bot/getUpdates?timeout=100`, {
+        expect(mockedAxios.get).toHaveBeenCalledWith(`${SNAPSTER_API_URL}/v1/botApi/getUpdates?timeout=100`, {
             headers: {
                 Authorization: `Bearer test-token`
             }
