@@ -8,7 +8,6 @@ export const handleNewMessage = async (ctx: ICtx) => {
         if (!botVariables.getIsNewMessageHandlerSet() || !handler) return false
             
         handler(ctx);
-
         return true;
     } catch (error) {
         console.error(`Error in checkTextHandler: ${error}`);

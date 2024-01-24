@@ -4,7 +4,7 @@ import { IGetMeAnswer } from "../types/message";
 
 export async function getMe(token: string) {
     try {
-        const serverRes = await axios.get(`${SNAPSTER_API_URL}/v1/bot/getMe`, {
+        const serverRes = await axios.get(`${SNAPSTER_API_URL}/v1/botApi/getMe`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -19,6 +19,6 @@ export async function getMe(token: string) {
         return dataRes
     } catch (err) {
         console.error(err)
-        return false
+        return "internet_error"
     }
 }

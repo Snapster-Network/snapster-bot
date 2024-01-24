@@ -7,7 +7,6 @@ class Scene implements IScene {
     private enterHandler: (ctx: ICtx) => void;
     private textHandler: (ctx: ICtx) => void;
     private messageHandler: (ctx: ICtx) => void;
-    private isEnter: boolean = true
 
     constructor(name: string) {
         this.name = name;
@@ -33,14 +32,9 @@ class Scene implements IScene {
     }
 
     handleAction(ctx: ICtx, action: EActionTypes) {
-        if (action == EActionTypes.enter || this.isEnter) this.isEnter = false, this.enterHandler(ctx)
+        if (action == EActionTypes.enter) this.enterHandler(ctx)
         else if (action == EActionTypes.text) this.textHandler(ctx)
         else if (action == EActionTypes.message) this.messageHandler(ctx)
-    }
-
-    leave() {
-        this.isEnter = true
-        return true
     }
 }
 

@@ -9,7 +9,7 @@ import { SNAPSTER_API_URL } from "../config";
  */
 export const longPollingRequest = async (token: string, timeout: number): Promise<any> => {
     try {
-        const response = await axios.get(`${SNAPSTER_API_URL}/v1/bot/getUpdates?timeout=${timeout}`, {
+        const response = await axios.get(`${SNAPSTER_API_URL}/v1/botApi/getUpdates?timeout=${timeout}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

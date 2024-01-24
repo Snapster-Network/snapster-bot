@@ -4,22 +4,20 @@ import { validateBotToken } from "../utils/validators";
 import { hearCommand } from "../services/hearCommand";
 import SceneManager from "../scenes/SceneManager";
 import { ICtx } from "../types/context";
-import { ISceneManagerObserver } from "../types/scene";
-import { handleNewMessage, setNewMessageHandler } from "../utils/handlers/defaultHandler";
+import { setNewMessageHandler } from "../utils/handlers/defaultHandler";
 import { getMe } from "../services/getMe";
-import { checkTextHandler } from "../utils/handlers/textHandler";
-import { checkCommandHandler } from "../utils/handlers/commandHandler";
-import { IUserMessageToBot } from "../types/message";
-import { longPollingRequest } from "../utils/longPollingRequest";
-import { EActionTypes } from "../utils/enums";
+import { IMessageAddInfoToUser } from "../types/message";
+import SessionManager from "../session/SessionManager";
+import getUpdates from "../services/getUpdates";
 
 /**
  * Class representing a SnapsterBot.
  */
-class SnapsterBot implements ISceneManagerObserver {
+class SnapsterBot {
     private botToken: string;
     private getUpdatesTimeout: number;
     private currentSceneManager: SceneManager
+    private currentSessionManager: SessionManager
     private publicContext: ICtx
 
     /**
@@ -36,6 +34,7 @@ class SnapsterBot implements ISceneManagerObserver {
         this.getUpdatesTimeout = timeout
 
         this.currentSceneManager = new SceneManager()
+        this.currentSessionManager = new SessionManager()
         this.publicContext = {
             bot: {
                 token,
@@ -55,11 +54,18 @@ class SnapsterBot implements ISceneManagerObserver {
                 enter: () => { },
                 reenter: () => { }
             },
+            session: {
+                currentScene: "",
+                isEnterStep: true,
+
+                setCurrentScene: () => { }
+            },
             reply: () => false
         }
 
         this.observerUpdate = this.observerUpdate.bind(this);
         this.currentSceneManager.addObserver(this.observerUpdate);
+        this.currentSessionManager.addObserver(this.observerUpdate);
     }
 
     /**
@@ -68,8 +74,8 @@ class SnapsterBot implements ISceneManagerObserver {
      * @param {string} text - The text of the message to send.
      * @returns A promise that resolves when the message is sent.
      */
-    public async sendMessage(chatId: string, text: string) {
-        return await sendMessage(this.botToken, chatId, text);
+    public async sendMessage(chatId: string, text: string, addInfo?: IMessageAddInfoToUser) {
+        return await sendMessage(this.botToken, chatId, text, addInfo);
     }
 
     /**
@@ -93,75 +99,45 @@ class SnapsterBot implements ISceneManagerObserver {
     }
 
     public async launch() {
+        if (this.currentSceneManager.isScenesArraySet() && !this.currentSceneManager.getDefaultScene()) throw new Error("Default scene not set")
+
         const botInfo = await getMe(this.botToken)
         if (!botInfo) throw new Error("Wrong bot token")
+        else if (botInfo == "internet_error") throw new Error("Internet error")
 
         this.publicContext.bot.botName = botInfo.botName
         this.publicContext.bot.username = botInfo.username
         this.publicContext.bot.tags = botInfo.tags
 
         console.log("Snapster Bot successfully started!")
-        let errorCount = 0;
-        const maxErrors = 10;
-        const pauseDuration = 15 * 60 * 1000;
-
-        while (true) {
-            try {
-                const serverRes = await longPollingRequest(this.publicContext.bot.token, this.getUpdatesTimeout);
-                if (!serverRes) throw new Error('Snapster server not working')
-                else if (serverRes.code != 200) return false;
-
-                const msgObj: IUserMessageToBot = {
-                    date: serverRes.data.message.date,
-                    chat: serverRes.data.message.chat,
-                    message_id: serverRes.data.message.message_id,
-                    from: serverRes.data.message.from,
-                    text: serverRes.data.message.text
-                };
-
-                this.publicContext.message = msgObj
-                this.publicContext.reply = async (text) => {
-                    return await sendMessage(this.publicContext.bot.token, serverRes.data.message.chat, text)
-                }
-
-                checkTextHandler(this.publicContext);
-                checkCommandHandler(this.publicContext);
-                handleNewMessage(this.publicContext)
-
-                this.currentSceneManager.handleUserRequest(this.publicContext, EActionTypes.text)
-
-                errorCount = 0;
-            } catch (error) {
-                console.error(`Error getting updates: ${error}`);
-                errorCount++;
-
-                await new Promise(resolve => setTimeout(resolve, 10 * 1000));
-
-                if (errorCount >= maxErrors) {
-                    console.error(`Too many wrong requests (${errorCount}), pausing for ${pauseDuration / 1000 / 60} minutes.`);
-                    await new Promise(resolve => setTimeout(resolve, pauseDuration));
-                    errorCount = 0;
-                }
-            }
-        }
+        getUpdates(this.publicContext, this.currentSessionManager, this.currentSceneManager, this.getUpdatesTimeout)
     }
 
-    public async sceneEnter(scene: string) {
-        console.log("from library: ", { scene })
-        this.currentSceneManager.sceneEnter(this.publicContext, scene, undefined)
+    // public async sceneEnter(scene: string) {
+    //     this.currentSceneManager.sceneEnter(this.publicContext, scene, undefined)
+    // }
+
+    public async setDefaultScene(scene: string) {
+        this.currentSceneManager.setDefaultScene(this.publicContext, scene, this.currentSessionManager)
     }
 
     public async setScenes(scenes: any) {
         this.currentSceneManager.setScenesArray(scenes);
     }
 
-    observerUpdate(ctx: ICtx, sceneManager: SceneManager) {
-        const currentSceneName = sceneManager.getCurrentSceneName();
+    observerUpdate(ctx: ICtx, sceneManager: SceneManager, sessionManager: SessionManager) {
+        this.currentSessionManager = sessionManager
+        this.currentSceneManager = sceneManager
+
+        const session = sessionManager.getSession(ctx.message.from)
+        if (!session) return
+        const sceneName = session.getCurrentScene()
+
 
         this.publicContext.scene = {
-            name: currentSceneName,
-            enter: (sceneName: string) => sceneManager.sceneEnter(ctx, sceneName, currentSceneName),
-            reenter: () => sceneManager.sceneReenter(ctx),
+            name: sceneName,
+            enter: (sceneName: string) => sceneManager.sceneEnter(ctx, sceneName, sessionManager),
+            reenter: () => sceneManager.sceneReenter(ctx, sessionManager),
         };
     }
 

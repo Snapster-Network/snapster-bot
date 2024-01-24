@@ -1,5 +1,6 @@
-import { IGetMeAnswer, IUserMessageToBot } from "./message"
+import { IGetMeAnswer, IMessageAddInfoToUser, IUserMessageToBot } from "./message"
 import { ISceneContext } from "./scene"
+import { ISessionContext } from "./session"
 
 interface IBot extends IGetMeAnswer {
     token: string,
@@ -9,7 +10,8 @@ interface ICtx {
     bot: IBot,
     message: IUserMessageToBot,
     scene: ISceneContext,
-    reply: (text: string) => void
+    session: ISessionContext
+    reply: (text: string, addInfo?: IMessageAddInfoToUser) => void
 }
 
 export { IBot, ICtx }

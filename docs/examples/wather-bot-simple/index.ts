@@ -14,7 +14,7 @@ const Bot = new SnapsterBot(BOT_TOKEN)
 Bot.setScenes(ScenesGenerator)
 
 // Direct the bot to start with the "start" scene upon launch
-Bot.sceneEnter("start")
+Bot.setDefaultScene("start")
 
 // Launch the bot to start receiving and processing messages
 Bot.launch()
