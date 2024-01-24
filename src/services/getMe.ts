@@ -19,6 +19,6 @@ export async function getMe(token: string) {
         return dataRes
     } catch (err) {
         console.error(err)
-        return false
+        return "internet_error"
     }
 }

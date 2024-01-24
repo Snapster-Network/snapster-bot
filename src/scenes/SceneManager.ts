@@ -1,23 +1,26 @@
+import SessionManager from "../session/SessionManager";
 import { ICtx } from "../types/context";
+import { ISceneManagerObserver } from "../types/scene";
+import { ISession } from "../types/session";
 import { EActionTypes } from "../utils/enums";
 import Scene from "./Scene";
 
 class SceneManager {
     private scenesArray: Record<string, Scene>;
-    private currentScene: string | undefined;
-    private observers: Function[] = [];
+    private observers: ISceneManagerObserver[] = [];
+    private defaultScene: string | undefined
 
     constructor() {
         this.scenesArray = {}
     }
 
-    addObserver(observer: Function) {
+    addObserver(observer: ISceneManagerObserver) {
         this.observers.push(observer);
     }
 
-    notifyObservers(ctx: ICtx) {
+    notifyObservers(ctx: ICtx, sessionManager: SessionManager) {
         for (const observer of this.observers) {
-            observer(ctx, this);
+            observer(ctx, this, sessionManager);
         }
     }
 
@@ -36,48 +39,70 @@ class SceneManager {
         }
     }
 
-    leaveScene(sceneName: string) {
-        const previousScene = this.scenesArray[sceneName]
-        if (!previousScene) return false;
+    // leaveScene(sceneName: string) {
+    //     const previousScene = this.scenesArray[sceneName]
+    //     if (!previousScene) return false;
 
-        return previousScene.leave()
-    }
+    //     return previousScene.leave()
+    // }
 
-    async sceneEnter(ctx: ICtx, sceneName: string, oldScene: string | undefined): Promise<boolean> {
+    async sceneEnter(ctx: ICtx, sceneName: string, sessionManager: SessionManager): Promise<boolean> {
         if (!this.scenesArray[sceneName]) return false;
-        if (this.currentScene) this.scenesArray[sceneName].handleAction(ctx, EActionTypes.enter);
-        if (oldScene) this.leaveScene(oldScene)
-        this.currentScene = sceneName;
-        this.notifyObservers(ctx);
+        this.scenesArray[sceneName].handleAction(ctx, EActionTypes.enter);
+        // if (oldScene) this.leaveScene(oldScene)
+        // this.currentScene = sceneName;
+        const session = sessionManager.getSession(ctx.message.from)
+        // if (this.currentScene && !session?.getIsEnterStep()) this.scenesArray[sceneName].handleAction(ctx, EActionTypes.enter);
+        session?.setCurrentScene(sceneName)
+        session?.setIsEnterStep(false)
+        this.notifyObservers(ctx, sessionManager);
         return true;
     }
 
-    sceneReenter(ctx: ICtx) {
-        const currentScene = this.getCurrentSceneName()
-        if (!currentScene) return false
-        this.notifyObservers(ctx);
-        return this.sceneEnter(ctx, currentScene, currentScene)
+    setDefaultScene(ctx: ICtx, sceneName: string, sessionManager: SessionManager) {
+        if (this.defaultScene) throw new Error(`Scene was set earlier (${this.defaultScene})`);
+        else if (!this.scenesArray[sceneName]) throw new Error(`Scene "${sceneName}" not found`);
+        this.defaultScene = sceneName
+        // this.notifyObservers(ctx, sessionManager);
+        ctx
+        sessionManager
     }
 
-    getCurrentScene() {
-        if (!this.scenesArray || !this.currentScene) return undefined
-        const currentScene = this.scenesArray[this.currentScene]
-        return currentScene || undefined
+    getDefaultScene() {
+        return this.defaultScene
     }
 
-    getCurrentSceneName(): string | undefined {
-        return this.currentScene
+
+    sceneReenter(ctx: ICtx, sessionManager: SessionManager) {
+        const session = sessionManager.getSession(ctx.message.from)
+        if (!session) return
+        const sceneName = session.getCurrentScene()
+        const currentScene = this.scenesArray[sceneName]
+        if (!currentScene) return
+        this.scenesArray[sceneName].handleAction(ctx, EActionTypes.enter);
+        session.setCurrentScene(sceneName)
+        session.setIsEnterStep(false)
+        this.notifyObservers(ctx, sessionManager);
     }
 
-    isSceneSet() {
-        if (!this.currentScene) return false
-        return true
+    isScenesArraySet() {
+        return Object.keys(this.scenesArray).length != 0
     }
 
-    handleUserRequest(ctx: ICtx, action: EActionTypes): boolean {
+    getScene(sceneName: string) {
+        return this.scenesArray[sceneName]
+    }
+
+    handleUserRequest(ctx: ICtx, serverAction: EActionTypes, userSession: ISession): boolean {
         try {
-            const currentScene: Scene | undefined = this.getCurrentScene();
+            const currentScene: Scene = this.getScene(userSession.getCurrentScene())
             if (!currentScene) return false;
+
+            let action = serverAction
+            if (userSession.getIsEnterStep()) {
+                action = EActionTypes.enter
+                userSession.setIsEnterStep(false)
+            } else action = serverAction
 
             currentScene.handleAction(ctx, action);
             return true;

@@ -1,4 +1,5 @@
 import SceneManager from "../scenes/SceneManager";
+import SessionManager from "../session/SessionManager";
 import { EActionTypes } from "../utils/enums";
 import { ICtx } from "./context";
 
@@ -27,8 +28,6 @@ interface ISceneContext {
 }
 
 
-interface ISceneManagerObserver {
-    observerUpdate(ctx: ICtx, sceneManager: SceneManager): void;
-}
+type ISceneManagerObserver = (ctx: ICtx, sceneManager: SceneManager, sessionManager: SessionManager) => void;
 
 export { IScenesGenerator, IScene, ISceneContext, ISceneManagerObserver }
