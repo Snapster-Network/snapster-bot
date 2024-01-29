@@ -7,7 +7,7 @@ import { setCommandHandler } from "../utils/handlers/commandHandler";
  * @param {Function} customHandler - The custom handler function to be executed when the command is received.
  * @returns {boolean} Returns `true` if the handler is successfully set, or `false` if there is an error or if the command format is invalid.
  */
-export const hearCommand = (text: string, customHandler: (ctx: ICtx) => void) => {
+export const hearCommand = (text: string, customHandler: (ctx: ICtx) => void): boolean => {
     try {
         if (text.length > 4096) return false;
 

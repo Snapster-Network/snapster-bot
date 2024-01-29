@@ -57,7 +57,7 @@ export const checkCommandHandler = async (ctx: ICtx) => {
  * @param {Function} customHandler - The custom handler function to execute when the command is received.
  * @returns {boolean} Returns `true` if the handler is successfully set, otherwise `false`.
  */
-export const setCommandHandler = async (text: string, customHandler: (ctx: ICtx) => void) => {
+export const setCommandHandler = (text: string, customHandler: (ctx: ICtx) => void): boolean => {
     try {
         if (!commandRegex.test(text)) return false;
 

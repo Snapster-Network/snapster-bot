@@ -48,7 +48,7 @@ export const checkTextHandler = async (ctx: ICtx) => {
  * @param {Function} customHandler - The custom handler function to execute when the text is received.
  * @returns {boolean} Returns `true` if the handler is successfully set, otherwise `false`.
  */
-export const setTextHandler = async (text: string, customHandler: (ctx: ICtx) => void) => {
+export const setTextHandler = (text: string, customHandler: (ctx: ICtx) => void): boolean => {
     try {
         const key = getKey(text);
         if (!handlers[key]) {

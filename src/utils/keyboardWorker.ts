@@ -1,5 +1,10 @@
 type ReplyKeyboardInput = string | number | Array<string | number> | Array<Array<string | number>>;
 
+/**
+ * Stylizes the reply keyboard to simplify work.
+ * @param {ReplyKeyboardInput} input - The keyboard object.
+ * @returns {Array<Array<string>>} - Stylized and normalized keyboard.
+ */
 function createReplyKeyboard(input: ReplyKeyboardInput): Array<Array<string>> {
     if (typeof input === 'string' || typeof input === 'number') {
         return [[input.toString()]];
