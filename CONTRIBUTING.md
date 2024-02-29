@@ -8,8 +8,8 @@ Start by forking the Snapster Bot Library repository on GitHub.
 
 **Clone Your Fork:**
 Clone your forked repository to your local machine.
-`git clone https://github.com/your-username/snapster-bot-js.git`
-`cd snapster-bot-js` 
+`git clone https://github.com/your-username/snapster-bot.git`
+`cd snapster-bot` 
 
 **Create a New Branch:**   
 Create a new branch for your contribution.
