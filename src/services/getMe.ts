@@ -2,7 +2,12 @@ import axios from "axios";
 import { SNAPSTER_API_URL } from "../config";
 import { IGetMeAnswer } from "../types/message";
 
-export async function getMe(token: string) {
+/**
+ * Async request to Snapster API to get bot information by bot token.
+ * @param {string} token - Unique bot token.
+ * @returns {Promise<string | "internet_error" | IGetMeAnswer>} - Return "internet_error" if internet error, 'false' if request error, IGetMeAnswer if successful response.
+ */
+export async function getMe(token: string): Promise<"internet_error" | false | IGetMeAnswer> {
     try {
         const serverRes = await axios.get(`${SNAPSTER_API_URL}/v1/botApi/getMe`, {
             headers: {

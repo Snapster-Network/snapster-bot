@@ -1,26 +1,36 @@
-type ReplyKeyboardInput = string | number | Array<string | number> | Array<Array<string | number>>;
+type ReplyKeyboardInput = string | number | Array<ReplyKeyboardInput>;
 
-function createReplyKeyboard(input: ReplyKeyboardInput): Array<Array<string>> | undefined {
-    if (typeof input === 'string' || typeof input === 'number') {
-        return [[input.toString()]];
-    } else if (Array.isArray(input)) {
-        if (input.length === 0) {
-            return [[]];
-        } else if (typeof input[0] === 'string' || typeof input[0] === 'number') {
-            return [input.map(item => item.toString())];
-        } else if (Array.isArray(input[0])) {
-            return input.reduce((acc: Array<Array<string>>, subArray) => {
-                if (Array.isArray(subArray)) {
-                    acc.push(subArray.map(item => item.toString()));
-                }
-                return acc;
+/**
+ * Stylizes the reply keyboard to simplify work.
+ * @param {ReplyKeyboardInput} input - The keyboard object.
+ * @returns {Array<Array<string>>} - Stylized and normalized keyboard.
+ */
+function createReplyKeyboard(input: ReplyKeyboardInput): Array<Array<string>> {
+    function flatten(input: ReplyKeyboardInput): Array<string> {
+        if (typeof input === 'string' || typeof input === 'number') {
+            return [input.toString()];
+        } else if (Array.isArray(input)) {
+            return input.reduce((acc: Array<string>, item) => {
+                return acc.concat(flatten(item)); // Use concat to merge arrays
             }, []);
+        } else {
+            console.error("Keyboard error");
+            return [];
         }
     }
-    return undefined
+
+    if (Array.isArray(input) && input.length > 0 && Array.isArray(input[0])) {
+        // Process each sub-array separately to maintain structure
+        return input.map(subInput => flatten(subInput));
+    } else {
+        // Process as a single row
+        return [flatten(input)];
+    }
 }
 
-function createInlineKeyboard(input:any){
+
+
+function createInlineKeyboard(input: any) {
     input
 }
 

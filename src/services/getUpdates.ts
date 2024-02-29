@@ -9,7 +9,14 @@ import { checkTextHandler } from "../utils/handlers/textHandler";
 import { longPollingRequest } from "../utils/longPollingRequest";
 import { sendMessage } from "./sendMessage";
 
-const getUpdates = async (ctx: ICtx, sessionManager: SessionManager, sceneManager: SceneManager, timeout: number) => {
+/**
+ * Long polling request to the server to receive updates.
+ * @param {ICtx} ctx - Context with information about the bot.
+ * @param {SessionManager} sessionManager - Information about bot session.
+ * @param {SceneManager} sceneManager - Information about bot scenes.
+ * @param {number} timeout - Number of seconds of long polling delay.
+ */
+const getUpdates = async (ctx: ICtx, sessionManager: SessionManager, sceneManager: SceneManager, timeout: number): Promise<void> => {
     let errorCount = 0;
     const maxErrors = 10;
     const pauseDuration = 15 * 60 * 1000;

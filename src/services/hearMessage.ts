@@ -7,7 +7,7 @@ import { setTextHandler } from "../utils/handlers/textHandler";
  * @param {Function} customHandler - The custom handler function to be executed when the text is received.
  * @returns {boolean} Returns `true` if the handler is successfully set, or `false` if there is an error or if the text is too long.
  */
-export const hearMessage = (text: string, customHandler: (ctx: ICtx) => void) => {
+export const hearMessage = (text: string, customHandler: (ctx: ICtx) => void): boolean => {
     try {
         if (text.length > 4096) return false;
 
