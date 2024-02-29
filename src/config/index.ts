@@ -3,7 +3,7 @@ import { IBotVariables } from "../types/bot";
 /**
  * Base URL for the Snapster API.
  */
-export const SNAPSTER_API_URL = 'http://localhost:3000';
+export const SNAPSTER_API_URL = 'https://messages.api.snapster.com.ua';
 
 /**
  * Bot variables configuration.
