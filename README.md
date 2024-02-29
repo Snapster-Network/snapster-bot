@@ -1,5 +1,5 @@
 # Snapster Bot Library
-**snapster-bot-js** - is a Node.js library designed to create and manage bots on the Snapster platform. This library simplifies the interaction with the Snapster API, allowing developers to easily send messages, handle commands, notifications, work with scenes and context, and all other features of the Snapster Bot API.
+**snapster-bot** - is a Node.js library designed to create and manage bots on the Snapster platform. This library simplifies the interaction with the Snapster API, allowing developers to easily send messages, handle commands, notifications, work with scenes and context, and all other features of the Snapster Bot API.
 ## Features
 
 - Sending and receiving messages.
@@ -12,7 +12,7 @@
 
 To install the library via npm, run the following command:
 
-`npm install snapster-bot-js`
+`npm install snapster-bot`
 ## API
 
 Description of the methods used in the project. Divided into:
@@ -91,7 +91,7 @@ Here's a quick example to get you started:
 
 ```javascript
 // Import the SnapsterBot class from the library
-import { SnapsterBot } from "snapster-bot-js"
+import { SnapsterBot } from "snapster-bot"
 
 // Retrieve the BOT_TOKEN environment variable
 const { BOT_TOKEN } = process.env;

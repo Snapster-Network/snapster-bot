@@ -1,5 +1,5 @@
 {
-  "name": "snapster-bot-js",
+  "name": "snapster-bot",
   "version": "1.0.1",
   "main": "dist/index.js",
   "scripts": {
